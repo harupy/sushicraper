@@ -30,7 +30,7 @@ def download_img(img_src, img_name, save_dir):
 def multi_download(img_srcs, img_names, save_dir):
 	num_cpu = multiprocessing.cpu_count()
 	with multiprocessing.Pool(num_cpu) as p:
-		p.starmap(download_img, zip(img_srcs, img_names, repeat(save_dir)))
+		p.starmap(download_img, zip(img_srcs, img_names, repeat(save_dir)))	
 
 
 def sushibenkei(soup):
