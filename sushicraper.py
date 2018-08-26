@@ -1,15 +1,13 @@
 import requests
 from bs4 import BeautifulSoup
 import re
-import csv
-from collections import OrderedDict
 import shutil
 import os
 import multiprocessing
 from itertools import repeat
 
 """
-Each sushi scraper function takes soup object and returns image source urls and names
+Each sushi scraper function takes a soup object and returns image source urls and names
 """
 
 
@@ -30,12 +28,11 @@ def download_img(img_src, img_name, save_dir):
 def multi_download(img_srcs, img_names, save_dir):
 	num_cpu = multiprocessing.cpu_count()
 	with multiprocessing.Pool(num_cpu) as p:
-		p.starmap(download_img, zip(img_srcs, img_names, repeat(save_dir)))	
+		p.starmap(download_img, zip(img_srcs, img_names, repeat(save_dir)))
 
 
 def sushibenkei(soup):
 	img_srcs = [x['src'] for x in soup.select('div.sushiitem > img')]
-	# img_names = list(map(lambda x: x.split('/')[-1], img_srcs))
 	regex = re.compile(r'[0-9]+円')
 	parser = lambda x: regex.sub('', x.replace('\n', '').replace('\u3000', ''))
 	img_names = [x.text + '.png' for x in soup.select('div.sushiitem')]
@@ -46,13 +43,11 @@ def sushibenkei(soup):
 def oshidorizushi(soup):
 	img_srcs = [x['src'] for x in soup.select('div.menu-a-item > img')]
 	img_names = [x.text + '.jpg' for x in soup.select('p.menu-a-name')]
-	# regex = re.compile(r'[0-9]+_')
-	# img_names = list(map(lambda x: regex.sub('', x.split('/')[-1]), img_srcs))
 	return img_srcs, img_names
 
 
 def nigiri_chojiro(soup):
-	uls = soup.select('ul.menu-list')[:7]  # Ignore the set menu
+	uls = soup.select('ul.menu-list')
 	img_srcs = ['https:' + li.find('img')['src'] for ul in uls for li in ul.find_all('li')]
 	img_names = [li.find('dt').text for ul in uls for li in ul.find_all('li')]
 	parser = lambda x: x.split('／')[0].lower().replace(' ', '_') + '.jpg'
@@ -80,7 +75,10 @@ def daiki_suisan(soup):
 
 
 def main():
-	funcs = [
+	img_dir = 'images'
+	if not os.path.exists(img_dir): os.mkdir(img_dir)
+
+	funcs_urls = [
 		(sushibenkei, 'http://www.sushibenkei.co.jp/sushimenu/'),
 		(oshidorizushi, 'http://www.echocom.co.jp/menu'),
 		(nigiri_chojiro, 'https://www.chojiro.jp/menu/menu.php?pid=1'),
@@ -88,15 +86,14 @@ def main():
 		(sushi_value, 'https://www.sushi-value.com/menu/'),
 		(daiki_suisan, 'http://www.daiki-suisan.co.jp/sushi/grandmenu/'),
 	]
-
-	for func, url in funcs:
+	
+	for func, url in funcs_urls:
 		soup = BeautifulSoup(requests.get(url).text, 'lxml')
 		img_srcs, img_names = func(soup)
-		save_dir = func.__name__
-		if not os.path.exists(save_dir):
-			os.mkdir(save_dir)
-		multi_download(img_srcs, img_names, func.__name__)
-	
+		save_dir = os.path.join('images', func.__name__)
+		if not os.path.exists(save_dir): os.mkdir(save_dir)
+		multi_download(img_srcs, img_names, save_dir)
+
 
 if __name__ == '__main__':
 	main()

@@ -7,12 +7,7 @@ __pycache__/
 .DS_Store
 
 # image directories
-daiki_suisan/
-nigiri_chojiro/
-nigiri_no_tokubei/
-oshidorizushi/
-sushi_value/
-sushibenkei/
+images/
 
 # C extensions
 *.so
