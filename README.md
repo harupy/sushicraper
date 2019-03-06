@@ -1,9 +1,6 @@
 # Sushicraper
-## How to run:
-```
+
+## Usage:
+```console
 python sushicraper.py
 ```
-
-## Libraries required:
-- Beautiful Soup
-- requests
