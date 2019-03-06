@@ -1,6 +1,6 @@
 # Sushicraper
 
-## Usage:
+## Usage
 ```console
 python sushicraper.py
 ```
